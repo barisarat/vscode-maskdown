@@ -1,0 +1,57 @@
+{
+  "name": "note-md-viewer",
+  "displayName": "Note Markdown Viewer",
+  "description": "A simple custom Markdown note viewer for .note.md files.",
+  "version": "0.0.2",
+  "publisher": "baris-dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aratbaris/vscode-note-viewer.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCustomEditor:noteMdViewer.viewer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "noteMdViewer.viewer",
+        "displayName": "Note Markdown Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.note.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "noteMdViewer.openAsNote",
+        "title": "Open as Note Markdown Viewer"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.9.1",
+    "typescript": "^5.5.0"
+  }
+}
