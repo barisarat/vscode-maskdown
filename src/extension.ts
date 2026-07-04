@@ -29,11 +29,33 @@ export function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand("vscode.openWith", targetUri, "noteMdViewer.viewer")
     })
   )
+
+  // Editor title-bar actions. They operate on the note whose viewer is active,
+  // tracked by the provider (a custom editor is not an activeTextEditor).
+  context.subscriptions.push(
+    vscode.commands.registerCommand("noteMdViewer.editSource", async () => {
+      const uri = provider.activeDocument?.uri
+      if (!uri) return
+      await vscode.commands.executeCommand("vscode.openWith", uri, "default", { preview: false })
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("noteMdViewer.copySource", async () => {
+      const document = provider.activeDocument
+      if (!document) return
+      await vscode.env.clipboard.writeText(document.getText())
+      vscode.window.showInformationMessage("Note source copied.")
+    })
+  )
 }
 
 export function deactivate() {}
 
 class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
+  // The note whose viewer currently has focus; used by the title-bar commands.
+  public activeDocument: vscode.TextDocument | undefined
+
   async resolveCustomTextEditor(
     document: vscode.TextDocument,
     webviewPanel: vscode.WebviewPanel
@@ -41,6 +63,8 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
     webviewPanel.webview.options = {
       enableScripts: true
     }
+
+    this.activeDocument = document
 
     const updateWebview = () => {
       webviewPanel.webview.html = this.getHtml(document)
@@ -52,25 +76,23 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
       }
     })
 
+    const viewStateSubscription = webviewPanel.onDidChangeViewState(() => {
+      if (webviewPanel.active) {
+        this.activeDocument = document
+      }
+    })
+
     webviewPanel.onDidDispose(() => {
       changeSubscription.dispose()
+      viewStateSubscription.dispose()
+      if (this.activeDocument === document) {
+        this.activeDocument = undefined
+      }
     })
 
     webviewPanel.webview.onDidReceiveMessage(async message => {
-      if (message.command === "editSource") {
-        await vscode.commands.executeCommand("vscode.openWith", document.uri, "default", {
-          preview: false
-        })
-      }
-
-      if (message.command === "copySource") {
-        await vscode.env.clipboard.writeText(document.getText())
-        vscode.window.showInformationMessage("Note source copied.")
-      }
-
       if (message.command === "copyValue") {
         await vscode.env.clipboard.writeText(String(message.value ?? ""))
-        vscode.window.showInformationMessage("Copied.")
       }
     })
 
@@ -96,31 +118,6 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
     background: var(--vscode-editor-background);
     padding: 24px 32px;
     line-height: 1.55;
-  }
-
-  .toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    gap: 8px;
-    padding: 8px 0 16px 0;
-    background: var(--vscode-editor-background);
-    border-bottom: 1px solid var(--vscode-editorWidget-border);
-    margin-bottom: 24px;
-  }
-
-  button {
-    color: var(--vscode-button-foreground);
-    background: var(--vscode-button-background);
-    border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background: var(--vscode-button-hoverBackground);
   }
 
   h1 {
@@ -232,12 +229,13 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
   .masked {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
   }
 
   .masked .dots {
     letter-spacing: 2px;
     color: var(--vscode-descriptionForeground);
+    user-select: none;
   }
 
   .masked .shown {
@@ -253,39 +251,78 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
     display: inline;
   }
 
-  .copy,
-  .reveal {
-    font-size: 0.75em;
-    padding: 1px 6px;
+  /* Quiet icon buttons: hidden until the value is hovered or focused */
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
     background: transparent;
     color: var(--vscode-descriptionForeground);
-    border: 1px solid var(--vscode-editorWidget-border);
-    border-radius: 3px;
-    opacity: 0.55;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 90ms ease, background-color 90ms ease, color 90ms ease;
   }
 
-  .copyable:hover .copy,
-  .masked:hover .copy,
-  .masked:hover .reveal,
-  .copy:focus,
-  .reveal:focus {
+  .copyable:hover .icon-btn,
+  .masked:hover .icon-btn,
+  .copyable:focus-within .icon-btn,
+  .masked:focus-within .icon-btn,
+  .icon-btn:focus-visible {
     opacity: 1;
   }
 
-  .copy:hover,
-  .reveal:hover {
-    color: var(--vscode-button-foreground);
-    background: var(--vscode-button-background);
-    border-color: var(--vscode-button-background);
+  .icon-btn:hover {
+    color: var(--vscode-foreground);
+    background: var(--vscode-toolbar-hoverBackground);
+  }
+
+  .icon-btn:focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+  }
+
+  .icon-btn svg {
+    display: block;
+  }
+
+  /* Copy button: swap copy glyph for a check briefly after a copy */
+  .icon-btn .i-check {
+    display: none;
+    color: var(--vscode-charts-green, var(--vscode-testing-iconPassed, #3fb950));
+  }
+
+  .icon-btn.copied {
+    opacity: 1;
+  }
+
+  .icon-btn.copied .i-copy {
+    display: none;
+  }
+
+  .icon-btn.copied .i-check {
+    display: inline-flex;
+  }
+
+  /* Reveal button: eye vs eye-off follows the revealed state */
+  .icon-btn.reveal .i-eye-off {
+    display: none;
+  }
+
+  .masked.revealed .icon-btn.reveal .i-eye {
+    display: none;
+  }
+
+  .masked.revealed .icon-btn.reveal .i-eye-off {
+    display: inline-flex;
   }
 </style>
 </head>
 <body>
-  <div class="toolbar">
-    <button id="editSource">Edit Source</button>
-    <button id="copySource">Copy Source</button>
-  </div>
-
   <main>
     ${rendered}
   </main>
@@ -293,17 +330,15 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi()
 
-    document.getElementById("editSource").addEventListener("click", () => {
-      vscode.postMessage({ command: "editSource" })
-    })
-
-    document.getElementById("copySource").addEventListener("click", () => {
-      vscode.postMessage({ command: "copySource" })
-    })
-
     document.querySelectorAll(".copy").forEach(button => {
       button.addEventListener("click", () => {
         vscode.postMessage({ command: "copyValue", value: button.getAttribute("data-value") })
+        button.classList.add("copied")
+        button.setAttribute("title", "Copied")
+        window.setTimeout(() => {
+          button.classList.remove("copied")
+          button.setAttribute("title", "Copy value")
+        }, 1200)
       })
     })
 
@@ -312,13 +347,7 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
         const span = button.closest(".masked")
         const shown = span.querySelector(".shown")
         const revealed = span.classList.toggle("revealed")
-        if (revealed) {
-          shown.textContent = span.getAttribute("data-value")
-          button.textContent = "hide"
-        } else {
-          shown.textContent = ""
-          button.textContent = "reveal"
-        }
+        shown.textContent = revealed ? span.getAttribute("data-value") : ""
       })
     })
   </script>
