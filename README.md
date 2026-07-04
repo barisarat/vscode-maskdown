@@ -80,6 +80,9 @@ project-notes.note.md
 
 Open the file in VS Code. It should open with **Note Markdown Viewer**.
 
+A ready-made example lives at [`examples/company-info.note.md`](examples/company-info.note.md) -
+open it to see reference cards and masked values in action.
+
 ## Example note
 
 ````markdown
