@@ -2,7 +2,7 @@
   "name": "note-md-viewer",
   "displayName": "Note Markdown Viewer",
   "description": "A copy-friendly Markdown note viewer for .note.md files, with reference cards and maskable fields.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "baris-dev",
   "repository": {
     "type": "git",
@@ -34,7 +34,9 @@
     "commands": [
       {
         "command": "noteMdViewer.openAsNote",
-        "title": "Open as Note Markdown Viewer"
+        "title": "Open in Note Viewer",
+        "category": "Note Markdown Viewer",
+        "icon": "$(open-preview)"
       },
       {
         "command": "noteMdViewer.editSource",
@@ -51,6 +53,11 @@
     ],
     "menus": {
       "editor/title": [
+        {
+          "command": "noteMdViewer.openAsNote",
+          "when": "resourceFilename =~ /\\.note\\.md$/ && activeCustomEditorId != noteMdViewer.viewer",
+          "group": "navigation@1"
+        },
         {
           "command": "noteMdViewer.editSource",
           "when": "activeCustomEditorId == noteMdViewer.viewer",
