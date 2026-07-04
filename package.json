@@ -1,8 +1,8 @@
 {
   "name": "note-md-viewer",
   "displayName": "Note Markdown Viewer",
-  "description": "A simple custom Markdown note viewer for .note.md files.",
-  "version": "0.0.2",
+  "description": "A copy-friendly Markdown note viewer for .note.md files, with reference cards and maskable fields.",
+  "version": "0.1.0",
   "publisher": "baris-dev",
   "repository": {
     "type": "git",
@@ -41,6 +41,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node test/render.test.js",
+    "preview": "npm run compile && node test/preview.js",
     "package": "vsce package",
     "publish": "vsce publish"
   },

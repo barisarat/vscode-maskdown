@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import MarkdownIt from "markdown-it"
+import { renderMarkdownBody } from "./render"
 
 export function activate(context: vscode.ExtensionContext) {
   const provider = new NoteMarkdownViewerProvider()
@@ -34,16 +34,6 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
-  private readonly markdown: MarkdownIt
-
-  constructor() {
-    this.markdown = new MarkdownIt({
-      html: false,
-      linkify: true,
-      breaks: true
-    })
-  }
-
   async resolveCustomTextEditor(
     document: vscode.TextDocument,
     webviewPanel: vscode.WebviewPanel
@@ -77,6 +67,11 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
         await vscode.env.clipboard.writeText(document.getText())
         vscode.window.showInformationMessage("Note source copied.")
       }
+
+      if (message.command === "copyValue") {
+        await vscode.env.clipboard.writeText(String(message.value ?? ""))
+        vscode.window.showInformationMessage("Copied.")
+      }
     })
 
     updateWebview()
@@ -84,7 +79,7 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
 
   private getHtml(document: vscode.TextDocument): string {
     const nonce = getNonce()
-    const rendered = this.markdown.render(document.getText())
+    const rendered = renderMarkdownBody(document.getText())
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -204,6 +199,85 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
   ::selection {
     background: var(--vscode-editor-selectionBackground);
   }
+
+  /* Reference card */
+  table.fields {
+    width: auto;
+    min-width: 320px;
+    max-width: 100%;
+  }
+
+  table.fields td {
+    border: none;
+    border-bottom: 1px solid var(--vscode-editorWidget-border);
+    padding: 6px 12px 6px 0;
+  }
+
+  table.fields tr:last-child td {
+    border-bottom: none;
+  }
+
+  table.fields td.fk {
+    color: var(--vscode-descriptionForeground);
+    white-space: nowrap;
+    padding-right: 24px;
+  }
+
+  table.fields td.fv {
+    font-family: var(--vscode-editor-font-family);
+  }
+
+  /* Copyable + masked values */
+  .copyable,
+  .masked {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .masked .dots {
+    letter-spacing: 2px;
+    color: var(--vscode-descriptionForeground);
+  }
+
+  .masked .shown {
+    display: none;
+    font-family: var(--vscode-editor-font-family);
+  }
+
+  .masked.revealed .dots {
+    display: none;
+  }
+
+  .masked.revealed .shown {
+    display: inline;
+  }
+
+  .copy,
+  .reveal {
+    font-size: 0.75em;
+    padding: 1px 6px;
+    background: transparent;
+    color: var(--vscode-descriptionForeground);
+    border: 1px solid var(--vscode-editorWidget-border);
+    border-radius: 3px;
+    opacity: 0.55;
+  }
+
+  .copyable:hover .copy,
+  .masked:hover .copy,
+  .masked:hover .reveal,
+  .copy:focus,
+  .reveal:focus {
+    opacity: 1;
+  }
+
+  .copy:hover,
+  .reveal:hover {
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-background);
+    border-color: var(--vscode-button-background);
+  }
 </style>
 </head>
 <body>
@@ -225,6 +299,27 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
 
     document.getElementById("copySource").addEventListener("click", () => {
       vscode.postMessage({ command: "copySource" })
+    })
+
+    document.querySelectorAll(".copy").forEach(button => {
+      button.addEventListener("click", () => {
+        vscode.postMessage({ command: "copyValue", value: button.getAttribute("data-value") })
+      })
+    })
+
+    document.querySelectorAll(".masked .reveal").forEach(button => {
+      button.addEventListener("click", () => {
+        const span = button.closest(".masked")
+        const shown = span.querySelector(".shown")
+        const revealed = span.classList.toggle("revealed")
+        if (revealed) {
+          shown.textContent = span.getAttribute("data-value")
+          button.textContent = "hide"
+        } else {
+          shown.textContent = ""
+          button.textContent = "reveal"
+        }
+      })
     })
   </script>
 </body>

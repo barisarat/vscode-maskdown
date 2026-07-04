@@ -26,6 +26,44 @@ So you can keep normal `.md` files unchanged, while opening `.note.md` files in 
 - Allows normal text selection and copying from the rendered view
 - Includes an **Edit Source** button to open the raw Markdown file
 - Includes a **Copy Source** button to copy the full Markdown source
+- Renders `::: fields` blocks as clean **reference cards** with a copy button on every row
+- Supports **maskable values** with `||value||`, shown as dots with reveal and copy buttons
+
+## Reference cards and masked values
+
+This viewer is built for keeping copy-paste reference notes: account names, addresses,
+customer numbers, IBANs. Two small additions on top of plain Markdown make that pleasant.
+
+### Reference cards
+
+Wrap `key: value` lines in a `::: fields` block to render a compact card where every
+value has a one-click copy button. Prefix a row with `*` to mask it.
+
+```txt
+::: fields
+Company: Acme GmbH
+Address: Hauptstr. 1, 10115 Berlin
+*IBAN: DE89 3704 0044 0532 0130 00
+*Account: acme-ops-77
+:::
+```
+
+Masked rows render as dots. Click **reveal** to show the value, or **copy** to copy it
+without ever showing it on screen.
+
+### Inline masked values
+
+Anywhere in a note, wrap a value in `||double bars||` to mask it inline:
+
+```txt
+Support login is ||acme-support-77|| for the shared inbox.
+```
+
+> **Note on masking.** Masking is a display convenience for reading and screen-sharing
+> notes in front of others. It is **not encryption** - the value is still stored as
+> plain text in the `.note.md` file and can be read in any editor. Use it for things you
+> just don't want on screen (account numbers, addresses), not for real secrets or
+> passwords.
 
 ## Usage
 
