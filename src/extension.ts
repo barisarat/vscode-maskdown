@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
       const targetUri = uri ?? vscode.window.activeTextEditor?.document.uri
 
       if (!targetUri) {
-        vscode.window.showInformationMessage("Open a .note.md file first.")
+        vscode.window.showInformationMessage("Open a .mask.md file first.")
         return
       }
 
@@ -109,7 +109,7 @@ class NoteMarkdownViewerProvider implements vscode.CustomTextEditorProvider {
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Note Markdown Viewer</title>
+<title>Maskdown</title>
 <style>
   body {
     font-family: var(--vscode-font-family);

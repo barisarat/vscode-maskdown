@@ -1,12 +1,12 @@
 {
   "name": "note-md-viewer",
-  "displayName": "Note Markdown Viewer",
-  "description": "A copy-friendly Markdown note viewer for .note.md files, with reference cards and maskable fields.",
-  "version": "0.1.3",
+  "displayName": "Maskdown",
+  "description": "A copy-friendly Markdown note viewer for .mask.md files, with reference cards and maskable fields.",
+  "version": "0.1.4",
   "publisher": "baris-dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aratbaris/vscode-note-viewer.git"
+    "url": "https://github.com/aratbaris/vscode-maskdown.git"
   },
   "engines": {
     "vscode": "^1.90.0"
@@ -22,9 +22,17 @@
     "languages": [
       {
         "id": "note-md",
-        "aliases": ["Note Markdown"],
-        "extensions": [".note.md"],
-        "filenamePatterns": ["*.note.md"],
+        "aliases": [
+          "Maskdown"
+        ],
+        "extensions": [
+          ".mask.md",
+          ".note.md"
+        ],
+        "filenamePatterns": [
+          "*.mask.md",
+          "*.note.md"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -38,8 +46,11 @@
     "customEditors": [
       {
         "viewType": "noteMdViewer.viewer",
-        "displayName": "Note Markdown Viewer",
+        "displayName": "Maskdown",
         "selector": [
+          {
+            "filenamePattern": "*.mask.md"
+          },
           {
             "filenamePattern": "*.note.md"
           }
@@ -50,20 +61,20 @@
     "commands": [
       {
         "command": "noteMdViewer.openAsNote",
-        "title": "Open in Note Viewer",
-        "category": "Note Markdown Viewer",
+        "title": "Open in Maskdown",
+        "category": "Maskdown",
         "icon": "$(open-preview)"
       },
       {
         "command": "noteMdViewer.editSource",
         "title": "Edit Source",
-        "category": "Note Markdown Viewer",
+        "category": "Maskdown",
         "icon": "$(edit)"
       },
       {
         "command": "noteMdViewer.copySource",
         "title": "Copy Source",
-        "category": "Note Markdown Viewer",
+        "category": "Maskdown",
         "icon": "$(copy)"
       }
     ],
@@ -71,7 +82,7 @@
       "editor/title": [
         {
           "command": "noteMdViewer.openAsNote",
-          "when": "resourceFilename =~ /\\.note\\.md$/ && activeCustomEditorId != noteMdViewer.viewer",
+          "when": "resourceFilename =~ /\\.(note|mask)\\.md$/ && activeCustomEditorId != noteMdViewer.viewer",
           "group": "navigation@1"
         },
         {

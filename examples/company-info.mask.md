@@ -1,7 +1,7 @@
 # Acme GmbH - reference sheet
 
-A sample `.note.md` to see the viewer in action. Open it with **Note Markdown
-Viewer** (it should open that way automatically). Hover a value to copy it; click
+A sample `.note.md` to see the viewer in action. Open it with **Maskdown**
+(it should open that way automatically). Hover a value to copy it; click
 **reveal** on a masked value to show it, or **copy** to copy without revealing.
 
 ## Company details

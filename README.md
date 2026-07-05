@@ -1,6 +1,6 @@
-# Note Markdown Viewer
+# Maskdown
 
-A simple VS Code extension that opens `.note.md` files in a clean rendered Markdown view.
+A simple VS Code extension that opens `.mask.md` files in a clean rendered Markdown view.
 
 It is made for people who want Markdown notes to behave more like readable notes, without the default VS Code Markdown preview behavior where double-clicking the preview jumps back to the source editor.
 
@@ -13,14 +13,17 @@ For example, when copying text from the preview, double-clicking a word can jump
 This extension provides a separate note viewer for files ending with:
 
 ```txt
-.note.md
+.mask.md
 ```
 
-So you can keep normal `.md` files unchanged, while opening `.note.md` files in a cleaner copy-friendly viewer.
+So you can keep normal `.md` files unchanged, while opening `.mask.md` files in a cleaner copy-friendly viewer.
+
+> **Backward compatibility.** Files ending in `.note.md` still open in the viewer as well, so
+> notes created before the rename keep working. `.mask.md` is the preferred extension going forward.
 
 ## Features
 
-- Opens `.note.md` files in a rendered Markdown view
+- Opens `.mask.md` files in a rendered Markdown view
 - Keeps normal `.md` files untouched
 - Supports headings, links, lists, code blocks, tables, blockquotes, and horizontal rules
 - Allows normal text selection and copying from the rendered view
@@ -61,26 +64,26 @@ Support login is ||acme-support-77|| for the shared inbox.
 
 > **Note on masking.** Masking is a display convenience for reading and screen-sharing
 > notes in front of others. It is **not encryption** - the value is still stored as
-> plain text in the `.note.md` file and can be read in any editor. Use it for things you
+> plain text in the `.mask.md` file and can be read in any editor. Use it for things you
 > just don't want on screen (account numbers, addresses), not for real secrets or
 > passwords.
 
 ## Usage
 
-Create a Markdown note file ending with `.note.md`.
+Create a Markdown note file ending with `.mask.md`.
 
 Examples:
 
 ```txt
-commands.note.md
-links.note.md
-company-info.note.md
-project-notes.note.md
+commands.mask.md
+links.mask.md
+company-info.mask.md
+project-notes.mask.md
 ```
 
-Open the file in VS Code. It should open with **Note Markdown Viewer**.
+Open the file in VS Code. It should open with **Maskdown**.
 
-A ready-made example lives at [`examples/company-info.note.md`](examples/company-info.note.md) -
+A ready-made example lives at [`examples/company-info.mask.md`](examples/company-info.mask.md) -
 open it to see reference cards and masked values in action.
 
 ## Example note
@@ -112,7 +115,7 @@ To edit the file, click:
 Edit Source
 ```
 
-This opens the same `.note.md` file as normal Markdown text.
+This opens the same `.mask.md` file as normal Markdown text.
 
 ## Copying notes
 
@@ -126,7 +129,7 @@ To copy a specific value or word, select it directly in the rendered view.
 
 ## Recommended setup
 
-Use `.note.md` for notes where you mostly want to read and copy.
+Use `.mask.md` for notes where you mostly want to read and copy.
 
 Use normal `.md` for Markdown files where you mainly edit source text.
 
@@ -134,9 +137,9 @@ Example folder structure:
 
 ```txt
 notes/
-  commands.note.md
-  links.note.md
-  references.note.md
+  commands.mask.md
+  links.mask.md
+  references.mask.md
   drafts.md
 ```
 
@@ -145,14 +148,14 @@ notes/
 The extension registers a custom editor for:
 
 ```txt
-*.note.md
+*.mask.md
 ```
 
-If a `.note.md` file does not open with the viewer automatically, right-click the editor tab and choose:
+If a `.mask.md` file does not open with the viewer automatically, right-click the editor tab and choose:
 
 ```txt
 Reopen Editor With...
-Note Markdown Viewer
+Maskdown
 ```
 
 You can also configure it manually in `.vscode/settings.json`:
@@ -160,7 +163,7 @@ You can also configure it manually in `.vscode/settings.json`:
 ```json
 {
   "workbench.editorAssociations": {
-    "*.note.md": "noteMdViewer.viewer"
+    "*.mask.md": "noteMdViewer.viewer"
   }
 }
 ```
@@ -177,7 +180,7 @@ It does not currently include:
 - live WYSIWYG editing
 - synchronization
 
-The goal is simple: render `.note.md` files in a clean copy-friendly view inside VS Code.
+The goal is simple: render `.mask.md` files in a clean copy-friendly view inside VS Code.
 
 ## License
 
